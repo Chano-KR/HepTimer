@@ -863,11 +863,11 @@ export function FocusTimerApp() {
             </h1>
           </div>
           
-          <div className="flex flex-col items-end gap-1">
-            <div className="flex flex-wrap items-center justify-end gap-2 text-right">
+          <div className="flex flex-col items-stretch md:items-end gap-1 w-full md:w-auto">
+            <div className="flex flex-wrap items-center justify-center md:justify-end gap-2 text-center md:text-right w-full">
               {isSupabaseConfigured ? (
                 user ? (
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center md:justify-end gap-3 w-full">
                     <span className="text-[14px] text-[#37383c9c] font-medium max-w-[200px] truncate">
                       {isSyncing ? "Syncing..." : user.email}
                     </span>
@@ -879,30 +879,30 @@ export function FocusTimerApp() {
                     </button>
                   </div>
                 ) : (
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center justify-center md:justify-end gap-2 w-full">
                     <input
                       value={email}
                       onChange={(event) => setEmail(event.target.value)}
                       placeholder="email@example.com"
-                      className="h-10 w-[160px] rounded-[14px] border border-[#c8cacf] bg-white px-3 text-[13px] outline-none focus:border-[#8f1d2c]"
+                      className="h-10 w-full sm:w-[160px] rounded-[14px] border border-[#c8cacf] bg-white px-3 text-[13px] outline-none focus:border-[#8f1d2c]"
                     />
                     <input
                       value={password}
                       onChange={(event) => setPassword(event.target.value)}
                       placeholder="password"
                       type="password"
-                      className="h-10 w-[110px] rounded-[14px] border border-[#c8cacf] bg-white px-3 text-[13px] outline-none focus:border-[#8f1d2c]"
+                      className="h-10 w-full sm:w-[110px] rounded-[14px] border border-[#c8cacf] bg-white px-3 text-[13px] outline-none focus:border-[#8f1d2c]"
                     />
-                    <div className="flex gap-1.5">
+                    <div className="flex gap-1.5 w-full sm:w-auto">
                       <button
                         onClick={signInWithPassword}
-                        className="h-10 rounded-[14px] bg-[#8f1d2c] px-3.5 text-[13px] font-semibold text-white hover:bg-[#731624] transition-colors"
+                        className="h-10 flex-1 sm:flex-initial rounded-[14px] bg-[#8f1d2c] px-3.5 text-[13px] font-semibold text-white hover:bg-[#731624] transition-colors"
                       >
                         Sign in
                       </button>
                       <button
                         onClick={signUpWithPassword}
-                        className="h-10 rounded-[14px] border border-[#c8cacf] bg-white px-3.5 text-[13px] font-medium hover:bg-[#f7f7f8] transition-colors"
+                        className="h-10 flex-1 sm:flex-initial rounded-[14px] border border-[#c8cacf] bg-white px-3.5 text-[13px] font-medium hover:bg-[#f7f7f8] transition-colors"
                       >
                         Sign up
                       </button>
@@ -910,13 +910,13 @@ export function FocusTimerApp() {
                   </div>
                 )
               ) : (
-                <span className="text-[13px] text-[#37383c9c]">
+                <span className="text-[13px] text-[#37383c9c] w-full text-center md:text-right">
                   로컬 프리뷰 모드
                 </span>
               )}
             </div>
             {authMessage && (
-              <p className="text-[12px] text-[#8f1d2c] font-medium mt-1">{authMessage}</p>
+              <p className="text-[12px] text-[#8f1d2c] font-medium mt-1 text-center md:text-right">{authMessage}</p>
             )}
           </div>
         </header>
@@ -950,14 +950,14 @@ export function FocusTimerApp() {
                     {heatmapTitle} focus heatmap
                   </p>
                 </div>
-                <div className="flex items-center gap-2 flex-nowrap">
+                <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                   <select
                     value={filterCategoryId}
                     onChange={(e) => {
                       setFilterCategoryId(e.target.value);
                       setSelectedDate(null);
                     }}
-                    className="h-9 rounded-[14px] border border-[#d9dade] bg-white px-3 text-[13px] font-medium text-[#37383c9c] outline-none focus:border-[#8f1d2c]"
+                    className="h-9 flex-1 sm:flex-initial min-w-[130px] rounded-[14px] border border-[#d9dade] bg-white px-3 text-[13px] font-medium text-[#37383c9c] outline-none focus:border-[#8f1d2c]"
                   >
                     <option value="">전체 카테고리</option>
                     {categories.map((cat) => (
@@ -967,7 +967,7 @@ export function FocusTimerApp() {
                     ))}
                   </select>
 
-                  <div className="flex items-center gap-1.5 border border-[#d9dade] bg-[#f7f7f8] p-[3px] rounded-[14px]">
+                  <div className="flex items-center justify-between sm:justify-start gap-1.5 border border-[#d9dade] bg-[#f7f7f8] p-[3px] rounded-[14px] flex-grow sm:flex-grow-0">
                     {(["day", "week", "month"] as const).map((mode) => (
                       <button
                         key={mode}
@@ -975,7 +975,7 @@ export function FocusTimerApp() {
                           setStatsMode(mode);
                           setSelectedDate(null);
                         }}
-                        className={`h-7 rounded-[11px] px-3 text-[12px] font-semibold transition-all ${
+                        className={`h-7 rounded-[11px] px-3 text-[12px] font-semibold transition-all flex-1 sm:flex-initial text-center ${
                           statsMode === mode
                             ? "bg-white text-[#171719] shadow-[0_2px_4px_0_#1717170a]"
                             : "text-[#37383c9c] hover:text-[#171719]"
@@ -1050,8 +1050,7 @@ export function FocusTimerApp() {
               </div>
             </div>
 
-            {/* Stats summary row */}
-            <div className="mt-5 grid grid-cols-2 gap-4">
+            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="rounded-[14px] border border-[#d9dade] bg-[#f7f7f8] p-4 shadow-[0_2px_4px_0_#17171705]">
                 <p className="text-[13px] font-medium text-[#37383c9c]">
                   {statsMode === "day" ? "오늘" : statsMode === "week" ? "최근 7일" : "최근 30일"} 총 집중 시간
@@ -1323,12 +1322,12 @@ export function FocusTimerApp() {
                 ))}
               </div>
 
-              <div className="mt-4 flex gap-2">
+              <div className="mt-4">
                 {/* Idle State */}
                 {!isRunning && remainingSeconds === selectedMinutes * 60 && (
                   <button
                     onClick={startTimer}
-                    className="flex h-12 flex-1 items-center justify-center gap-2 rounded-[14px] bg-[#8f1d2c] text-[15px] font-semibold text-white shadow-[0_8px_14px_0_#8f1d2c29] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#731624]"
+                    className="flex h-12 w-full items-center justify-center gap-2 rounded-[14px] bg-[#8f1d2c] text-[15px] font-semibold text-white shadow-[0_8px_14px_0_#8f1d2c29] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#731624]"
                   >
                     <Image src="/icons/play.svg" alt="" width={18} height={18} className="invert" />
                     Start
@@ -1337,7 +1336,7 @@ export function FocusTimerApp() {
 
                 {/* Running State */}
                 {isRunning && (
-                  <>
+                  <div className="flex gap-2 w-full">
                     <button
                       onClick={() => setIsRunning(false)}
                       className="flex h-12 flex-1 items-center justify-center gap-2 rounded-[14px] border border-[#c8cacf] bg-white text-[15px] font-semibold text-[#171719] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#171719]"
@@ -1351,32 +1350,32 @@ export function FocusTimerApp() {
                     >
                       Cancel
                     </button>
-                  </>
+                  </div>
                 )}
 
                 {/* Paused State */}
                 {!isRunning && remainingSeconds < selectedMinutes * 60 && (
-                  <>
+                  <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:gap-2">
                     <button
                       onClick={startTimer}
-                      className="flex h-12 flex-1 items-center justify-center gap-2 rounded-[14px] bg-[#8f1d2c] text-[15px] font-semibold text-white shadow-[0_8px_14px_0_#8f1d2c29] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#731624]"
+                      className="flex h-12 col-span-2 sm:flex-1 items-center justify-center gap-2 rounded-[14px] bg-[#8f1d2c] text-[15px] font-semibold text-white shadow-[0_8px_14px_0_#8f1d2c29] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#731624]"
                     >
                       <Image src="/icons/play.svg" alt="" width={18} height={18} className="invert" />
                       Resume
                     </button>
                     <button
                       onClick={() => saveSession("completed", remainingSeconds)}
-                      className="h-12 rounded-[14px] border border-[#c8cacf] bg-white px-4 text-[15px] font-medium text-[#171719] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#171719]"
+                      className="h-12 col-span-1 sm:flex-initial rounded-[14px] border border-[#c8cacf] bg-white px-4 text-[15px] font-medium text-[#171719] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#171719]"
                     >
                       Complete
                     </button>
                     <button
                       onClick={() => saveSession("canceled", remainingSeconds)}
-                      className="h-12 rounded-[14px] border border-[#ff4242] bg-[#fff5f5] px-4 text-[15px] font-medium text-[#ff4242] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff4242]"
+                      className="h-12 col-span-1 sm:flex-initial rounded-[14px] border border-[#ff4242] bg-[#fff5f5] px-4 text-[15px] font-medium text-[#ff4242] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff4242]"
                     >
                       Cancel
                     </button>
-                  </>
+                  </div>
                 )}
               </div>
             </div>
@@ -1500,41 +1499,43 @@ export function FocusTimerApp() {
             </button>
           </div>
 
-          <div className="mt-6 flex h-36 items-end gap-2 lg:mt-0">
-            {summaryBars.map((bar) => {
-              const height = Math.max(
-                20,
-                Math.min(128, bar.minutes * (statsMode === "day" ? 1.8 : 0.42)),
-              );
-              const active = bar.minutes >= (statsMode === "day" ? 50 : 180);
-              const isSelected = selectedDate === bar.periodKey;
+          <div className="mt-6 overflow-x-auto pb-2 lg:mt-0 flex-grow scrollbar-thin">
+            <div className="flex h-36 items-end gap-2 min-w-[420px] w-full">
+              {summaryBars.map((bar) => {
+                const height = Math.max(
+                  20,
+                  Math.min(128, bar.minutes * (statsMode === "day" ? 1.8 : 0.42)),
+                );
+                const active = bar.minutes >= (statsMode === "day" ? 50 : 180);
+                const isSelected = selectedDate === bar.periodKey;
 
-              return (
-                <div
-                  key={bar.label}
-                  onClick={() => {
-                    setSelectedDate((prev) => (prev === bar.periodKey ? null : bar.periodKey));
-                  }}
-                  className="flex flex-1 flex-col items-center cursor-pointer group"
-                >
+                return (
                   <div
-                    className={`flex w-full items-end justify-center rounded-t-[3px] pb-2 text-[13px] transition-all hover:opacity-85 ${
-                      isSelected
-                        ? "bg-[#8f1d2c] text-white ring-2 ring-offset-1 ring-[#8f1d2c]"
-                        : active
-                          ? "bg-[#8f1d2c] text-white"
-                          : "bg-[#d7d8da]"
-                    }`}
-                    style={{ height }}
+                    key={bar.label}
+                    onClick={() => {
+                      setSelectedDate((prev) => (prev === bar.periodKey ? null : bar.periodKey));
+                    }}
+                    className="flex flex-1 flex-col items-center cursor-pointer group"
                   >
-                    {bar.minutes > 0 ? bar.minutes : ""}
+                    <div
+                      className={`flex w-full items-end justify-center rounded-t-[3px] pb-2 text-[13px] transition-all hover:opacity-85 ${
+                        isSelected
+                          ? "bg-[#8f1d2c] text-white ring-2 ring-offset-1 ring-[#8f1d2c]"
+                          : active
+                            ? "bg-[#8f1d2c] text-white"
+                            : "bg-[#d7d8da]"
+                      }`}
+                      style={{ height }}
+                    >
+                      {bar.minutes > 0 ? bar.minutes : ""}
+                    </div>
+                    <span className={`mt-2 text-[13px] transition-colors ${isSelected ? "text-[#8f1d2c] font-bold" : "text-[#37383c9c]"}`}>
+                      {bar.label}
+                    </span>
                   </div>
-                  <span className={`mt-2 text-[13px] transition-colors ${isSelected ? "text-[#8f1d2c] font-bold" : "text-[#37383c9c]"}`}>
-                    {bar.label}
-                  </span>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -1569,7 +1570,7 @@ export function FocusTimerApp() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-[#eaebec] text-[13px] font-semibold text-[#37383c9c]">
+                <tr className="border-b border-[#eaebec] text-[13px] font-semibold text-[#37383c9c] whitespace-nowrap">
                   <th className="pb-3 pt-2">날짜/시간</th>
                   <th className="pb-3 pt-2">카테고리</th>
                   <th className="pb-3 pt-2">목표 시간</th>
@@ -1589,7 +1590,7 @@ export function FocusTimerApp() {
                   .map((session) => {
                     const cat = categories.find((c) => c.id === session.categoryId);
                     return (
-                      <tr key={session.id} className="hover:bg-[#f7f7f8] transition-colors">
+                      <tr key={session.id} className="hover:bg-[#f7f7f8] transition-colors whitespace-nowrap">
                         <td className="py-3 text-[#2e2f33e0]">
                           {new Date(session.endedAt).toLocaleString("ko-KR", {
                             month: "short",
