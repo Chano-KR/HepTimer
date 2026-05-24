@@ -4,6 +4,7 @@ import Image from "next/image";
 import type { User } from "@supabase/supabase-js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  clearSupabaseBrowserSession,
   createSupabaseBrowserClient,
   isSupabaseConfigured,
 } from "@/lib/supabase/client";
@@ -188,6 +189,7 @@ function isSessionInSelectedDate(session: Session, selectedDate: string | null) 
 
 export function FocusTimerApp() {
   const didExchangeAuthCode = useRef(false);
+  const authVersion = useRef(0);
   const supabase = useMemo(
     () => (isSupabaseConfigured ? createSupabaseBrowserClient() : null),
     [],
@@ -261,7 +263,7 @@ export function FocusTimerApp() {
   }, [tempSound, tempNotification]);
 
   const loadFocusData = useCallback(
-    async (currentUser: User) => {
+    async (currentUser: User, version = authVersion.current) => {
       if (!supabase) {
         return;
       }
@@ -273,8 +275,10 @@ export function FocusTimerApp() {
         .order("created_at", { ascending: true });
 
       if (categoryError) {
-        setAuthMessage(categoryError.message);
-        setIsSyncing(false);
+        if (authVersion.current === version) {
+          setAuthMessage(categoryError.message);
+          setIsSyncing(false);
+        }
         return;
       }
 
@@ -298,8 +302,10 @@ export function FocusTimerApp() {
           .select("id,name,color");
 
         if (seedError) {
-          setAuthMessage(seedError.message);
-          setIsSyncing(false);
+          if (authVersion.current === version) {
+            setAuthMessage(seedError.message);
+            setIsSyncing(false);
+          }
           return;
         }
 
@@ -318,8 +324,14 @@ export function FocusTimerApp() {
         .limit(500);
 
       if (sessionError) {
-        setAuthMessage(sessionError.message);
-        setIsSyncing(false);
+        if (authVersion.current === version) {
+          setAuthMessage(sessionError.message);
+          setIsSyncing(false);
+        }
+        return;
+      }
+
+      if (authVersion.current !== version) {
         return;
       }
 
@@ -374,6 +386,10 @@ export function FocusTimerApp() {
       }
 
       const { data } = await client.auth.getSession();
+      if (authVersion.current !== 0) {
+        return;
+      }
+
       const currentUser = data.session?.user ?? null;
       setUser(currentUser);
 
@@ -382,24 +398,34 @@ export function FocusTimerApp() {
           id: currentUser.id,
           email: currentUser.email,
         });
-        await loadFocusData(currentUser);
+        await loadFocusData(currentUser, authVersion.current);
       }
     }
 
     initializeAuth();
 
     const { data: listener } = client.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
+        const eventVersion = authVersion.current + 1;
+        authVersion.current = eventVersion;
         const currentUser = session?.user ?? null;
+
+        if (event === "SIGNED_OUT" || !currentUser) {
+          setUser(null);
+          setCategories(initialCategories);
+          setSessions(sampleSessions);
+          setSelectedCategoryId("study");
+          setIsSyncing(false);
+          return;
+        }
+
         setUser(currentUser);
 
-        if (currentUser) {
-          await client.from("profiles").upsert({
-            id: currentUser.id,
-            email: currentUser.email,
-          });
-          await loadFocusData(currentUser);
-        }
+        await client.from("profiles").upsert({
+          id: currentUser.id,
+          email: currentUser.email,
+        });
+        await loadFocusData(currentUser, eventVersion);
       },
     );
 
@@ -827,12 +853,20 @@ export function FocusTimerApp() {
       return;
     }
 
-    await supabase.auth.signOut();
+    authVersion.current += 1;
+    clearSupabaseBrowserSession();
     setUser(null);
     setCategories(initialCategories);
     setSessions(sampleSessions);
     setSelectedCategoryId("study");
+    setIsSyncing(false);
     setAuthMessage("");
+
+    const { error } = await supabase.auth.signOut({ scope: "local" });
+    if (error) {
+      clearSupabaseBrowserSession();
+      setAuthMessage("로그아웃은 처리됐지만 Supabase 세션 정리 중 오류가 있었습니다.");
+    }
   }
 
   const totalSeconds = selectedMinutes * 60;
