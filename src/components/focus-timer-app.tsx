@@ -190,6 +190,8 @@ function isSessionInSelectedDate(session: Session, selectedDate: string | null) 
 export function FocusTimerApp() {
   const didExchangeAuthCode = useRef(false);
   const authVersion = useRef(0);
+  const timerEndsAtRef = useRef<number | null>(null);
+  const isCompletingTimerRef = useRef(false);
   const supabase = useMemo(
     () => (isSupabaseConfigured ? createSupabaseBrowserClient() : null),
     [],
@@ -238,14 +240,32 @@ export function FocusTimerApp() {
     categories.find((category) => category.id === selectedCategoryId) ??
     categories[0];
 
+  const getLiveRemainingSeconds = useCallback((fallback = remainingSeconds) => {
+    const endsAt = timerEndsAtRef.current;
+    if (!endsAt) {
+      return fallback;
+    }
+
+    return Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
+  }, [remainingSeconds]);
+
   const startTimer = useCallback(() => {
+    timerEndsAtRef.current = Date.now() + remainingSeconds * 1000;
+    isCompletingTimerRef.current = false;
     setIsRunning(true);
     if (typeof window !== "undefined" && "Notification" in window) {
       if (Notification.permission === "default" && isNotificationEnabled) {
         Notification.requestPermission();
       }
     }
-  }, [isNotificationEnabled]);
+  }, [isNotificationEnabled, remainingSeconds]);
+
+  const pauseTimer = useCallback(() => {
+    const nextRemainingSeconds = getLiveRemainingSeconds();
+    timerEndsAtRef.current = null;
+    setRemainingSeconds(nextRemainingSeconds);
+    setIsRunning(false);
+  }, [getLiveRemainingSeconds]);
 
   // 설정 저장
   const saveSettings = useCallback(() => {
@@ -436,6 +456,8 @@ export function FocusTimerApp() {
   }, [loadFocusData, supabase]);
 
   const choosePreset = useCallback((minutes: number) => {
+    timerEndsAtRef.current = null;
+    isCompletingTimerRef.current = false;
     setSelectedMinutes(minutes);
     setRemainingSeconds(minutes * 60);
     setIsRunning(false);
@@ -443,6 +465,8 @@ export function FocusTimerApp() {
 
   const saveSession = useCallback(
     async (status: "completed" | "canceled", finalRemainingSeconds: number) => {
+      timerEndsAtRef.current = null;
+      isCompletingTimerRef.current = false;
       const actualSeconds = selectedMinutes * 60 - finalRemainingSeconds;
 
       if (actualSeconds < 60) {
@@ -588,20 +612,33 @@ export function FocusTimerApp() {
       return;
     }
 
-    const interval = window.setInterval(() => {
-      setRemainingSeconds((current) => {
-        if (current <= 1) {
-          window.clearInterval(interval);
-          setIsRunning(false);
-          saveSession("completed", 0);
-          return 0;
-        }
+    const syncRemainingSeconds = () => {
+      const endsAt = timerEndsAtRef.current;
+      if (!endsAt) {
+        setIsRunning(false);
+        return;
+      }
 
-        return current - 1;
-      });
-    }, 1000);
+      const nextRemainingSeconds = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
+      setRemainingSeconds(nextRemainingSeconds);
 
-    return () => window.clearInterval(interval);
+      if (nextRemainingSeconds === 0 && !isCompletingTimerRef.current) {
+        isCompletingTimerRef.current = true;
+        setIsRunning(false);
+        void saveSession("completed", 0);
+      }
+    };
+
+    syncRemainingSeconds();
+    const interval = window.setInterval(syncRemainingSeconds, 1000);
+    window.addEventListener("focus", syncRemainingSeconds);
+    window.addEventListener("visibilitychange", syncRemainingSeconds);
+
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", syncRemainingSeconds);
+      window.removeEventListener("visibilitychange", syncRemainingSeconds);
+    };
   }, [isRunning, saveSession]);
 
   const completedToday = useMemo(() => {
@@ -1372,14 +1409,14 @@ export function FocusTimerApp() {
                 {isRunning && (
                   <div className="flex gap-2 w-full">
                     <button
-                      onClick={() => setIsRunning(false)}
+                      onClick={pauseTimer}
                       className="flex h-12 flex-1 items-center justify-center gap-2 rounded-[14px] border border-[#c8cacf] bg-white text-[15px] font-semibold text-[#171719] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#171719]"
                     >
                       <Image src="/icons/pause.svg" alt="" width={18} height={18} />
                       Pause
                     </button>
                     <button
-                      onClick={() => saveSession("canceled", remainingSeconds)}
+                      onClick={() => saveSession("canceled", getLiveRemainingSeconds())}
                       className="h-12 rounded-[14px] border border-[#ff4242] bg-[#fff5f5] px-4 text-[15px] font-medium text-[#ff4242] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff4242]"
                     >
                       Cancel
@@ -1398,13 +1435,13 @@ export function FocusTimerApp() {
                       Resume
                     </button>
                     <button
-                      onClick={() => saveSession("completed", remainingSeconds)}
+                      onClick={() => saveSession("completed", getLiveRemainingSeconds())}
                       className="h-12 col-span-1 sm:flex-initial rounded-[14px] border border-[#c8cacf] bg-white px-4 text-[15px] font-medium text-[#171719] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#171719]"
                     >
                       Complete
                     </button>
                     <button
-                      onClick={() => saveSession("canceled", remainingSeconds)}
+                      onClick={() => saveSession("canceled", getLiveRemainingSeconds())}
                       className="h-12 col-span-1 sm:flex-initial rounded-[14px] border border-[#ff4242] bg-[#fff5f5] px-4 text-[15px] font-medium text-[#ff4242] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff4242]"
                     >
                       Cancel
