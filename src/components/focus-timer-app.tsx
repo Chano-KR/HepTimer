@@ -56,22 +56,6 @@ const initialCategories: Category[] = [
   { id: "reading", name: "독서", color: "#00bf40" },
 ];
 
-const sampleSessions: Session[] = Array.from({ length: 74 }, (_, index) => {
-  const endedAt = new Date();
-  endedAt.setDate(endedAt.getDate() - index);
-  endedAt.setHours(21 - (index % 6), 10, 0, 0);
-
-  return {
-    id: `sample-${index}`,
-    categoryId: initialCategories[index % initialCategories.length].id,
-    plannedMinutes: presets[index % presets.length],
-    actualSeconds: (index % 4 === 0 ? 50 : presets[index % presets.length]) * 60,
-    startedAt: new Date(endedAt.getTime() - presets[index % presets.length] * 60000),
-    endedAt,
-    status: index % 4 === 0 ? "canceled" : "completed",
-  };
-});
-
 function formatTime(seconds: number) {
   const minutes = Math.floor(seconds / 60)
     .toString()
@@ -201,7 +185,7 @@ export function FocusTimerApp() {
   const [isRunning, setIsRunning] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState("study");
   const [categories, setCategories] = useState(initialCategories);
-  const [sessions, setSessions] = useState(sampleSessions);
+  const [sessions, setSessions] = useState<Session[]>([]);
   const [newCategory, setNewCategory] = useState("");
   const [user, setUser] = useState<User | null>(null);
   const [email, setEmail] = useState("");
@@ -433,7 +417,7 @@ export function FocusTimerApp() {
         if (event === "SIGNED_OUT" || !currentUser) {
           setUser(null);
           setCategories(initialCategories);
-          setSessions(sampleSessions);
+          setSessions([]);
           setSelectedCategoryId("study");
           setIsSyncing(false);
           return;
@@ -643,7 +627,7 @@ export function FocusTimerApp() {
 
   const completedToday = useMemo(() => {
     const today = dateKey(new Date());
-    let filtered = sessions;
+    let filtered = sessions.filter((session) => session.status === "completed");
     if (filterCategoryId) {
       filtered = filtered.filter((session) => session.categoryId === filterCategoryId);
     }
@@ -673,7 +657,7 @@ export function FocusTimerApp() {
     end.setHours(0, 0, 0, 0);
     end.setDate(end.getDate() + (6 - mondayFirstDay(end)));
 
-    let filtered = sessions;
+    let filtered = sessions.filter((session) => session.status === "completed");
     if (filterCategoryId) {
       filtered = filtered.filter((session) => session.categoryId === filterCategoryId);
     }
@@ -704,7 +688,7 @@ export function FocusTimerApp() {
   }, [heatmapWeekCount, sessions, filterCategoryId]);
 
   const statsSummary = useMemo(() => {
-    let filtered = sessions;
+    let filtered = sessions.filter((session) => session.status === "completed");
     if (filterCategoryId) {
       filtered = filtered.filter((s) => s.categoryId === filterCategoryId);
     }
@@ -750,7 +734,7 @@ export function FocusTimerApp() {
   }
 
   const summaryBars = useMemo(() => {
-    let filtered = sessions;
+    let filtered = sessions.filter((session) => session.status === "completed");
     if (filterCategoryId) {
       filtered = filtered.filter((session) => session.categoryId === filterCategoryId);
     }
@@ -894,7 +878,7 @@ export function FocusTimerApp() {
     clearSupabaseBrowserSession();
     setUser(null);
     setCategories(initialCategories);
-    setSessions(sampleSessions);
+    setSessions([]);
     setSelectedCategoryId("study");
     setIsSyncing(false);
     setAuthMessage("");
