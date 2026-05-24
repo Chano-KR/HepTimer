@@ -1,0 +1,61 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..800;1,6..72,300..800&display=swap");
+@import "tailwindcss";
+
+:root {
+  --background: #f7f7f8;
+  --foreground: #171719;
+  --label-neutral: #2e2f33e0;
+  --label-alternative: #37383c9c;
+  --label-assistive: #37383c47;
+  --line-normal: #70737c38;
+  --line-neutral: #70737c29;
+  --line-alternative: #70737c14;
+  --fill-normal: #70737c14;
+  --fill-strong: #70737c29;
+  --bg-normal: #ffffff;
+  --bg-alternative: #f7f7f8;
+  --accent-red: #8f1d2c;
+  --accent-red-strong: #731624;
+  --accent-red-soft: #f7e8eb;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: Pretendard, "Noto Sans KR", system-ui, sans-serif;
+  --font-newsreader: "Newsreader", serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Pretendard, "Noto Sans KR", system-ui, -apple-system,
+    BlinkMacSystemFont, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid #171719;
+  outline-offset: 2px;
+}
